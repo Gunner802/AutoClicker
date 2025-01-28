@@ -162,9 +162,9 @@
             // 
             settingsBox.Controls.Add(settingsButton1);
             settingsBox.Controls.Add(settingLabel1);
-            settingsBox.Location = new Point(18, 95);
+            settingsBox.Location = new Point(12, 95);
             settingsBox.Name = "settingsBox";
-            settingsBox.Size = new Size(460, 94);
+            settingsBox.Size = new Size(466, 94);
             settingsBox.TabIndex = 3;
             settingsBox.TabStop = false;
             settingsBox.Text = "Settings";
@@ -173,7 +173,7 @@
             // 
             settingsButton1.Location = new Point(101, 15);
             settingsButton1.Name = "settingsButton1";
-            settingsButton1.Size = new Size(108, 23);
+            settingsButton1.Size = new Size(144, 23);
             settingsButton1.TabIndex = 1;
             settingsButton1.Text = "empty";
             settingsButton1.UseVisualStyleBackColor = true;
