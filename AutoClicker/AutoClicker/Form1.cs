@@ -42,6 +42,7 @@ namespace AutoClicker
         private const uint MOUSEEVENTF_XDOWN = 0x0080;
         private const uint MOUSEEVENTF_XUP = 0x0100;
 
+        private int counter = 0;
 
         public Form1()
         {
@@ -58,24 +59,26 @@ namespace AutoClicker
             btnStop.Enabled = false;
         }
 
-        private void btnStop_Click(object sender, EventArgs e) 
-        {   isSpamming = true;  
+        private void btnStop_Click(object sender, EventArgs e)
+        {
+            isSpamming = true;
             StartStopSpamming();
             btnStop.Enabled = false;
             btnStart.Enabled = true;
 
 
         }
-        private void btnStart_Click(object sender, EventArgs e) 
-        { 
-            isSpamming = false;  
+        private void btnStart_Click(object sender, EventArgs e)
+        {
+            isSpamming = false;
             StartStopSpamming();
             int interval = GetSpamInterval();
-            if (settingsButton1.Text != "empty" && interval != 0) {
+            if (settingsButton1.Text != "empty" && interval != 0)
+            {
                 btnStart.Enabled = false;
                 btnStop.Enabled = true;
             }
-            
+
         }
         private void hoursLabel_Click(object sender, EventArgs e) { }
         private void hoursTBox_TextChanged(object sender, EventArgs e) { }
@@ -109,7 +112,7 @@ namespace AutoClicker
             {
                 isSettingHotkey = true;
             }
-           
+
 
 
             globalHook = Hook.GlobalEvents();
@@ -158,7 +161,8 @@ namespace AutoClicker
                 if (detectedInput == "Left")
                 {
                     detectedInput = "LeftClick";
-                } else if (detectedInput == "Right")
+                }
+                else if (detectedInput == "Right")
                 {
                     detectedInput = "RightClick";
                 }
@@ -335,6 +339,7 @@ namespace AutoClicker
                 spamTimer.Stop();
                 isSpamming = false;
                 Debug.WriteLine("Stopped spamming.");
+                counter = 0;
             }
             else
             {
@@ -361,6 +366,29 @@ namespace AutoClicker
         {
             string formattedKey = ConvertToSendKeysFormat(detectedInput);
 
+            if (maxClickBox.Checked)
+            {
+                if (counter < numericUpDown1.Value)
+                {
+                    counter++;
+                    ExecuteKeyOrMouseAction(formattedKey);
+                    
+                }
+                else
+                {
+                    StartStopSpamming(); // Stop when max count is reached
+                   
+                }
+            }
+            else if (infiniteClickBox.Checked)
+            {
+                ExecuteKeyOrMouseAction(formattedKey);
+            }
+        }
+
+        private void ExecuteKeyOrMouseAction(string formattedKey)
+        {
+            Debug.WriteLine("execution");
             if (!string.IsNullOrEmpty(formattedKey))
             {
                 SendKeys.SendWait(formattedKey);
@@ -371,6 +399,7 @@ namespace AutoClicker
                 Debug.WriteLine($"Spammed: {detectedInput} (Mouse Click)");
             }
         }
+
         private string ConvertToSendKeysFormat(string key)
         {
             switch (key)
@@ -450,8 +479,31 @@ namespace AutoClicker
             }
         }
 
+        private void infiniteClickBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (infiniteClickBox.Checked)
+            {
+                maxClickBox.Checked = false;
+            }
+            
+            
+
+        }
+
+        private void maxClickBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (maxClickBox.Checked)
+            {
+                infiniteClickBox.Checked = false;
+            }
 
 
+        }
 
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        {
+
+
+        }
     }
 }

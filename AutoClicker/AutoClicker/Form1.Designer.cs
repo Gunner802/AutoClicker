@@ -41,16 +41,20 @@
             secondsTBox = new TextBox();
             hoursTBox = new TextBox();
             settingsBox = new GroupBox();
+            infiniteClickBox = new CheckBox();
+            maxClickBox = new CheckBox();
             settingsButton1 = new Button();
             settingLabel1 = new Label();
             hotkeyButton = new Button();
+            numericUpDown1 = new NumericUpDown();
             tiBox.SuspendLayout();
             settingsBox.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numericUpDown1).BeginInit();
             SuspendLayout();
             // 
             // btnStart
             // 
-            btnStart.Location = new Point(76, 387);
+            btnStart.Location = new Point(76, 222);
             btnStart.Name = "btnStart";
             btnStart.Size = new Size(127, 53);
             btnStart.TabIndex = 0;
@@ -60,7 +64,7 @@
             // 
             // btnStop
             // 
-            btnStop.Location = new Point(272, 387);
+            btnStop.Location = new Point(272, 222);
             btnStop.Name = "btnStop";
             btnStop.Size = new Size(127, 53);
             btnStop.TabIndex = 1;
@@ -160,14 +164,41 @@
             // 
             // settingsBox
             // 
+            settingsBox.Controls.Add(numericUpDown1);
+            settingsBox.Controls.Add(infiniteClickBox);
+            settingsBox.Controls.Add(maxClickBox);
             settingsBox.Controls.Add(settingsButton1);
             settingsBox.Controls.Add(settingLabel1);
             settingsBox.Location = new Point(12, 95);
             settingsBox.Name = "settingsBox";
-            settingsBox.Size = new Size(466, 94);
+            settingsBox.Size = new Size(466, 84);
             settingsBox.TabIndex = 3;
             settingsBox.TabStop = false;
             settingsBox.Text = "Settings";
+            // 
+            // infiniteClickBox
+            // 
+            infiniteClickBox.AutoSize = true;
+            infiniteClickBox.Checked = true;
+            infiniteClickBox.CheckState = CheckState.Checked;
+            infiniteClickBox.Location = new Point(279, 40);
+            infiniteClickBox.Name = "infiniteClickBox";
+            infiniteClickBox.Size = new Size(98, 19);
+            infiniteClickBox.TabIndex = 6;
+            infiniteClickBox.Text = "Infintely Click";
+            infiniteClickBox.UseVisualStyleBackColor = true;
+            infiniteClickBox.CheckedChanged += infiniteClickBox_CheckedChanged;
+            // 
+            // maxClickBox
+            // 
+            maxClickBox.AutoSize = true;
+            maxClickBox.Location = new Point(279, 15);
+            maxClickBox.Name = "maxClickBox";
+            maxClickBox.Size = new Size(77, 19);
+            maxClickBox.TabIndex = 5;
+            maxClickBox.Text = "Max Click";
+            maxClickBox.UseVisualStyleBackColor = true;
+            maxClickBox.CheckedChanged += maxClickBox_CheckedChanged;
             // 
             // settingsButton1
             // 
@@ -191,7 +222,7 @@
             // 
             // hotkeyButton
             // 
-            hotkeyButton.Location = new Point(177, 459);
+            hotkeyButton.Location = new Point(168, 291);
             hotkeyButton.Name = "hotkeyButton";
             hotkeyButton.Size = new Size(127, 53);
             hotkeyButton.TabIndex = 4;
@@ -199,11 +230,20 @@
             hotkeyButton.UseVisualStyleBackColor = true;
             hotkeyButton.Click += hotkeyButton_Click;
             // 
+            // numericUpDown1
+            // 
+            numericUpDown1.Location = new Point(362, 14);
+            numericUpDown1.Name = "numericUpDown1";
+            numericUpDown1.Size = new Size(90, 23);
+            numericUpDown1.TabIndex = 5;
+            numericUpDown1.Value = new decimal(new int[] { 1, 0, 0, 0 });
+            numericUpDown1.ValueChanged += numericUpDown1_ValueChanged;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(497, 524);
+            ClientSize = new Size(497, 404);
             Controls.Add(hotkeyButton);
             Controls.Add(settingsBox);
             Controls.Add(tiBox);
@@ -216,6 +256,7 @@
             tiBox.PerformLayout();
             settingsBox.ResumeLayout(false);
             settingsBox.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)numericUpDown1).EndInit();
             ResumeLayout(false);
         }
 
@@ -236,5 +277,8 @@
         private Label settingLabel1;
         private Button settingsButton1;
         private Button hotkeyButton;
+        private CheckBox infiniteClickBox;
+        private CheckBox maxClickBox;
+        private NumericUpDown numericUpDown1;
     }
 }
