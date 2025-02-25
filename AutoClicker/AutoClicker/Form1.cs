@@ -2,17 +2,17 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using Gma.System.MouseKeyHook; // Needed for global hooks
+using Gma.System.MouseKeyHook;
 
 namespace AutoClicker
 {
     public partial class Form1 : Form
     {
         private IKeyboardMouseEvents globalHook;
-        private IKeyboardMouseEvents hotkeyHook; // Separate hook for hotkey tracking
+        private IKeyboardMouseEvents hotkeyHook;
         private string detectedInput;
         private string detectedInputHotkey;
-        private Button targetButton; // Store the selected button dynamically
+        private Button targetButton;
 
         // Store event handler references for proper unsubscription
         private KeyEventHandler keyDownHandler;
@@ -23,25 +23,9 @@ namespace AutoClicker
         private MouseEventHandler hotkeymouseDownHandler;
         private MouseEventHandler hotkeymouseWheelHandler;
 
-
         private bool isSettingHotkey = false;
-
         private System.Windows.Forms.Timer spamTimer;
         private bool isSpamming = false;
-
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint dwData, int dwExtraInfo);
-
-        // Mouse Event Constants
-        private const uint MOUSEEVENTF_LEFTDOWN = 0x0002;
-        private const uint MOUSEEVENTF_LEFTUP = 0x0004;
-        private const uint MOUSEEVENTF_RIGHTDOWN = 0x0008;
-        private const uint MOUSEEVENTF_RIGHTUP = 0x0010;
-        private const uint MOUSEEVENTF_MIDDLEDOWN = 0x0020;
-        private const uint MOUSEEVENTF_MIDDLEUP = 0x0040;
-        private const uint MOUSEEVENTF_XDOWN = 0x0080;
-        private const uint MOUSEEVENTF_XUP = 0x0100;
-
         private int counter = 0;
 
         public Form1()
@@ -51,7 +35,6 @@ namespace AutoClicker
 
             spamTimer = new System.Windows.Forms.Timer();
             spamTimer.Tick += SpamTimer_Tick;
-
 
             detectedInputHotkey = "F6";
             hotkeyButton.Text = detectedInputHotkey;
@@ -65,9 +48,8 @@ namespace AutoClicker
             StartStopSpamming();
             btnStop.Enabled = false;
             btnStart.Enabled = true;
-
-
         }
+
         private void btnStart_Click(object sender, EventArgs e)
         {
             isSpamming = false;
@@ -78,8 +60,9 @@ namespace AutoClicker
                 btnStart.Enabled = false;
                 btnStop.Enabled = true;
             }
-
         }
+
+        // (Other UI event handlers remain unchanged)
         private void hoursLabel_Click(object sender, EventArgs e) { }
         private void hoursTBox_TextChanged(object sender, EventArgs e) { }
         private void minutesTBox_TextChanged(object sender, EventArgs e) { }
@@ -107,16 +90,12 @@ namespace AutoClicker
             targetButton = button;
             targetButton.Text = "Press any key or button";
 
-            // If setting the hotkey, activate the flag
             if (targetButton.Name == "hotkeyButton")
             {
                 isSettingHotkey = true;
             }
 
-
-
             globalHook = Hook.GlobalEvents();
-
             keyDownHandler = (sender, e) => GlobalHook_KeyDown(sender, e, targetButton);
             mouseDownHandler = (sender, e) => GlobalHook_MouseDown(sender, e, targetButton);
             mouseWheelHandler = (sender, e) => GlobalHook_MouseWheel(sender, e, targetButton);
@@ -131,9 +110,10 @@ namespace AutoClicker
         // Global Key Detection (For Settings & Hotkey)
         private void GlobalHook_KeyDown(object sender, KeyEventArgs e, Button targetButton)
         {
+            // Prevent accidental click triggers
             if (e.KeyCode == Keys.Space || e.KeyCode == Keys.Enter)
             {
-                e.SuppressKeyPress = true; // Prevents accidental button click
+                e.SuppressKeyPress = true;
             }
 
             if (targetButton.Name == "settingsButton1")
@@ -145,7 +125,6 @@ namespace AutoClicker
             {
                 detectedInputHotkey = e.KeyCode.ToString();
                 targetButton.Text = "Key: " + detectedInputHotkey;
-
             }
 
             Debug.WriteLine($"Stored Input: {detectedInput}, Hotkey: {detectedInputHotkey}");
@@ -204,7 +183,7 @@ namespace AutoClicker
                 else if (targetButton.Name == "hotkeyButton")
                 {
                     detectedInputHotkey = "MouseWheelDown";
-                    targetButton.Text = "Key: " + detectedInputHotkey;
+                    targetButton.Text = "Mouse: " + detectedInputHotkey;
                 }
             }
 
@@ -215,63 +194,57 @@ namespace AutoClicker
         // Start Listening for the Hotkey Globally
         private void StartHotkeyListener()
         {
-            if (hotkeyHook == null) // Prevent multiple instances
+            if (hotkeyHook == null)
             {
                 Debug.WriteLine("Starting hotkey listener...");
                 hotkeyHook = Hook.GlobalEvents();
 
-                // Listen for keyboard hotkey
                 hotkeyListener = (sender, e) =>
                 {
                     if (isSettingHotkey)
                     {
                         isSettingHotkey = false;
-                        return; // Ignore input while setting the hotkey
+                        return;
                     }
 
                     if (!string.IsNullOrEmpty(detectedInputHotkey) && e.KeyCode.ToString() == detectedInputHotkey)
                     {
-                        StartStopSpamming(); // Start or stop spamming
+                        StartStopSpamming();
                     }
                 };
 
-                // Listen for mouse button hotkey
                 hotkeymouseDownHandler = (sender, e) =>
                 {
                     if (isSettingHotkey)
                     {
                         isSettingHotkey = false;
-                        return; // Ignore input while setting the hotkey
+                        return;
                     }
                     if (!string.IsNullOrEmpty(detectedInputHotkey) && e.Button.ToString() == detectedInputHotkey)
                     {
-                        StartStopSpamming(); // Start or stop spamming
+                        StartStopSpamming();
                     }
                 };
 
-                // Listen for mouse wheel hotkey
                 hotkeymouseWheelHandler = (sender, e) =>
                 {
                     if (isSettingHotkey)
                     {
                         isSettingHotkey = false;
-                        return; // Ignore input while setting the hotkey
+                        return;
                     }
                     string wheelDirection = e.Delta > 0 ? "MouseWheelUp" : "MouseWheelDown";
                     if (!string.IsNullOrEmpty(detectedInputHotkey) && detectedInputHotkey == wheelDirection)
                     {
-                        StartStopSpamming(); // Start or stop spamming
+                        StartStopSpamming();
                     }
                 };
 
-                // Attach global event listeners
                 hotkeyHook.KeyDown += hotkeyListener;
                 hotkeyHook.MouseDown += hotkeymouseDownHandler;
                 hotkeyHook.MouseWheel += hotkeymouseWheelHandler;
             }
         }
-
-
 
         // Cleanup input listeners to prevent memory leaks
         private void CleanupInputListeners()
@@ -305,6 +278,7 @@ namespace AutoClicker
                 hotkeyHook = null;
             }
         }
+
         private int GetSpamInterval()
         {
             int hours, minutes, seconds, milliseconds;
@@ -313,17 +287,14 @@ namespace AutoClicker
             {
                 hours = 0;
             }
-
             if (!int.TryParse(minutesTBox.Text, out minutes))
             {
                 minutes = 0;
             }
-
             if (!int.TryParse(secondsTBox.Text, out seconds))
             {
                 seconds = 0;
             }
-
             if (!int.TryParse(millisTBox.Text, out milliseconds))
             {
                 milliseconds = 0;
@@ -349,135 +320,211 @@ namespace AutoClicker
                     MessageBox.Show("Please enter a valid time interval!", "Invalid Interval", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
-
                 if (string.IsNullOrEmpty(detectedInput))
                 {
                     MessageBox.Show("Please select a key to spam first!", "No Key Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
-
                 spamTimer.Interval = interval;
                 spamTimer.Start();
                 isSpamming = true;
                 Debug.WriteLine($"Started spamming {detectedInput} every {interval}ms.");
             }
         }
+
         private void SpamTimer_Tick(object sender, EventArgs e)
         {
-            string formattedKey = ConvertToSendKeysFormat(detectedInput);
-
             if (maxClickBox.Checked)
             {
                 if (counter < numericUpDown1.Value)
                 {
                     counter++;
-                    ExecuteKeyOrMouseAction(formattedKey);
-                    
+                    ExecuteKeyOrMouseAction(detectedInput);
                 }
                 else
                 {
                     StartStopSpamming(); // Stop when max count is reached
-                   
                 }
             }
             else if (infiniteClickBox.Checked)
             {
-                ExecuteKeyOrMouseAction(formattedKey);
+                ExecuteKeyOrMouseAction(detectedInput);
             }
         }
 
-        private void ExecuteKeyOrMouseAction(string formattedKey)
+        // --- Revised Input Simulation using SendInput ---
+
+        // This method examines the stored input and sends it via SendInput
+        private void ExecuteKeyOrMouseAction(string input)
         {
-            Debug.WriteLine("execution");
-            if (!string.IsNullOrEmpty(formattedKey))
+            if (string.IsNullOrEmpty(input))
+                return;
+
+            switch (input)
             {
-                SendKeys.SendWait(formattedKey);
-                Debug.WriteLine($"Spammed: {formattedKey}");
-            }
-            else
-            {
-                Debug.WriteLine($"Spammed: {detectedInput} (Mouse Click)");
-            }
-        }
-
-        private string ConvertToSendKeysFormat(string key)
-        {
-            switch (key)
-            {
-                // Special Keyboard Keys
-                case "Enter": return "{ENTER}";
-                case "Space": return " ";
-                case "Backspace": return "{BACKSPACE}";
-                case "Tab": return "{TAB}";
-                case "Escape": return "{ESC}";
-                case "Delete": return "{DELETE}";
-                case "Up": return "{UP}";
-                case "Down": return "{DOWN}";
-                case "Left": return "{LEFT}";
-                case "Right": return "{RIGHT}";
-                case "Home": return "{HOME}";
-                case "End": return "{END}";
-                case "PageUp": return "{PGUP}";
-                case "PageDown": return "{PGDN}";
-                case "Insert": return "{INSERT}";
-                case "PrintScreen": return "{PRTSC}";
-                case "ScrollLock": return "{SCROLLLOCK}";
-                case "Pause": return "{PAUSE}";
-                case "NumLock": return "{NUMLOCK}";
-                case "CapsLock": return "{CAPSLOCK}";
-
-                // Function Keys
-                case "F1": return "{F1}";
-                case "F2": return "{F2}";
-                case "F3": return "{F3}";
-                case "F4": return "{F4}";
-                case "F5": return "{F5}";
-                case "F6": return "{F6}";
-                case "F7": return "{F7}";
-                case "F8": return "{F8}";
-                case "F9": return "{F9}";
-                case "F10": return "{F10}";
-                case "F11": return "{F11}";
-                case "F12": return "{F12}";
-
-                // Left & Right Shift Keys
-                case "LShiftKey": return "+";
-                case "RShiftKey": return "+";
-
-                // Mouse Inputs - Calls mouse_event instead of returning a key
                 case "LeftClick":
-                    mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-                    mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-                    return null;
+                    SendMouseClick(MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP);
+                    break;
                 case "RightClick":
-                    mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
-                    mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
-                    return null;
+                    SendMouseClick(MOUSEEVENTF_RIGHTDOWN, MOUSEEVENTF_RIGHTUP);
+                    break;
                 case "Middle":
-                    mouse_event(MOUSEEVENTF_MIDDLEDOWN, 0, 0, 0, 0);
-                    mouse_event(MOUSEEVENTF_MIDDLEUP, 0, 0, 0, 0);
-                    return null;
+                    SendMouseClick(MOUSEEVENTF_MIDDLEDOWN, MOUSEEVENTF_MIDDLEUP);
+                    break;
                 case "MouseWheelUp":
-                    mouse_event(MOUSEEVENTF_XDOWN, 0, 0, 1, 0);
-                    return null;
+                    SendMouseWheel(true);
+                    break;
                 case "MouseWheelDown":
-                    mouse_event(MOUSEEVENTF_XDOWN, 0, 0, unchecked((uint)-1), 0);
-                    return null;
-                case "XButton1":
-                    mouse_event(MOUSEEVENTF_XDOWN, 0, 0, 1, 0);
-                    mouse_event(MOUSEEVENTF_XUP, 0, 0, 1, 0);
-                    return null;
-                case "XButton2":
-                    mouse_event(MOUSEEVENTF_XDOWN, 0, 0, 2, 0);
-                    mouse_event(MOUSEEVENTF_XUP, 0, 0, 2, 0);
-                    return null;
-
+                    SendMouseWheel(false);
+                    break;
                 default:
-                    // If it's a single letter or digit, just return it
-                    if (key.Length == 1) return key;
-                    return ""; // Invalid key
+                    // Assume a keyboard key – attempt to parse the string to a Keys enum
+                    try
+                    {
+                        Keys key = (Keys)Enum.Parse(typeof(Keys), input);
+                        ushort vk = (ushort)key;
+                        SendKey(vk);
+                    }
+                    catch
+                    {
+                        Debug.WriteLine("Unknown key: " + input);
+                    }
+                    break;
             }
         }
+
+        // Sends a keyboard key press (down and up) using SendInput
+        private void SendKey(ushort keyCode)
+        {
+            INPUT[] inputs = new INPUT[2];
+
+            // Key down
+            inputs[0].type = INPUT_KEYBOARD;
+            inputs[0].u.ki.wVk = keyCode;
+            inputs[0].u.ki.wScan = 0;
+            inputs[0].u.ki.dwFlags = 0; // key down
+            inputs[0].u.ki.time = 0;
+            inputs[0].u.ki.dwExtraInfo = IntPtr.Zero;
+
+            // Key up
+            inputs[1].type = INPUT_KEYBOARD;
+            inputs[1].u.ki.wVk = keyCode;
+            inputs[1].u.ki.wScan = 0;
+            inputs[1].u.ki.dwFlags = KEYEVENTF_KEYUP;
+            inputs[1].u.ki.time = 0;
+            inputs[1].u.ki.dwExtraInfo = IntPtr.Zero;
+
+            SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT)));
+        }
+
+        // Sends a mouse click by issuing a button down and up event via SendInput
+        private void SendMouseClick(uint downFlag, uint upFlag)
+        {
+            INPUT[] inputs = new INPUT[2];
+
+            // Button down
+            inputs[0].type = INPUT_MOUSE;
+            inputs[0].u.mi.dx = 0;
+            inputs[0].u.mi.dy = 0;
+            inputs[0].u.mi.mouseData = 0;
+            inputs[0].u.mi.dwFlags = downFlag;
+            inputs[0].u.mi.time = 0;
+            inputs[0].u.mi.dwExtraInfo = IntPtr.Zero;
+
+            // Button up
+            inputs[1].type = INPUT_MOUSE;
+            inputs[1].u.mi.dx = 0;
+            inputs[1].u.mi.dy = 0;
+            inputs[1].u.mi.mouseData = 0;
+            inputs[1].u.mi.dwFlags = upFlag;
+            inputs[1].u.mi.time = 0;
+            inputs[1].u.mi.dwExtraInfo = IntPtr.Zero;
+
+            SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT)));
+        }
+
+        // Sends a mouse wheel event via SendInput.
+        private void SendMouseWheel(bool wheelUp)
+        {
+            const int WHEEL_DELTA = 120;
+            INPUT[] inputs = new INPUT[1];
+            inputs[0].type = INPUT_MOUSE;
+            inputs[0].u.mi.dx = 0;
+            inputs[0].u.mi.dy = 0;
+            inputs[0].u.mi.mouseData = (uint)(wheelUp ? WHEEL_DELTA : -WHEEL_DELTA);
+            inputs[0].u.mi.dwFlags = MOUSEEVENTF_WHEEL;
+            inputs[0].u.mi.time = 0;
+            inputs[0].u.mi.dwExtraInfo = IntPtr.Zero;
+            SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT)));
+        }
+
+        // --- Definitions and Imports for SendInput ---
+
+        private const uint INPUT_MOUSE = 0;
+        private const uint INPUT_KEYBOARD = 1;
+        private const uint INPUT_HARDWARE = 2;
+
+        private const uint KEYEVENTF_EXTENDEDKEY = 0x0001;
+        private const uint KEYEVENTF_KEYUP = 0x0002;
+        private const uint KEYEVENTF_SCANCODE = 0x0008;
+
+        private const uint MOUSEEVENTF_LEFTDOWN = 0x0002;
+        private const uint MOUSEEVENTF_LEFTUP = 0x0004;
+        private const uint MOUSEEVENTF_RIGHTDOWN = 0x0008;
+        private const uint MOUSEEVENTF_RIGHTUP = 0x0010;
+        private const uint MOUSEEVENTF_MIDDLEDOWN = 0x0020;
+        private const uint MOUSEEVENTF_MIDDLEUP = 0x0040;
+        private const uint MOUSEEVENTF_WHEEL = 0x0800;
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct INPUT
+        {
+            public uint type;
+            public InputUnion u;
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        private struct InputUnion
+        {
+            [FieldOffset(0)]
+            public MOUSEINPUT mi;
+            [FieldOffset(0)]
+            public KEYBDINPUT ki;
+            [FieldOffset(0)]
+            public HARDWAREINPUT hi;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct MOUSEINPUT
+        {
+            public int dx;
+            public int dy;
+            public uint mouseData;
+            public uint dwFlags;
+            public uint time;
+            public IntPtr dwExtraInfo;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct KEYBDINPUT
+        {
+            public ushort wVk;
+            public ushort wScan;
+            public uint dwFlags;
+            public uint time;
+            public IntPtr dwExtraInfo;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct HARDWAREINPUT
+        {
+            public uint uMsg;
+            public ushort wParamL;
+            public ushort wParamH;
+        }
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
 
         private void infiniteClickBox_CheckedChanged(object sender, EventArgs e)
         {
@@ -485,9 +532,6 @@ namespace AutoClicker
             {
                 maxClickBox.Checked = false;
             }
-            
-            
-
         }
 
         private void maxClickBox_CheckedChanged(object sender, EventArgs e)
@@ -496,14 +540,10 @@ namespace AutoClicker
             {
                 infiniteClickBox.Checked = false;
             }
-
-
         }
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
-
-
         }
     }
 }
