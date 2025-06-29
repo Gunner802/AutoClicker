@@ -4,7 +4,7 @@ A fast and lightweight auto clicker built with **C# and .NET** for Windows. Auto
 
 ## Features
 
-- 🖱️ Left and right mouse click simulation
+- 🖱️ Left and right mouse click simulation as well key presses
 - ⏱️ Configurable click intervals in ms, s, m, h
 - ⌨️ Global hotkeys to start and stop clicking
 - 🪟 Clean and minimal Windows Forms UI
